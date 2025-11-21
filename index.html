@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audio Timestamp Generator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fafafa;
+      color: #333;
+    }
+    h1 { text-align: center; }
+    #drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      margin: 20px 0;
+      background: #fff;
+      transition: border-color 0.3s;
+    }
+    #drop-area.dragover {
+      border-color: #007aff;
+      background: #f0f8ff;
+    }
+    #player { width: 100%; margin: 20px 0; }
+    #timestamps {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .instructions {
+      color: #666;
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio Timestamp Generator</h1>
+
+  <div id="drop-area">
+    <p>📁 Drag & drop an audio file here (MP3, WAV, MP4, MOV)</p>
+    <p><small>— or —</small></p>
+    <input type="file" id="file-input" accept="audio/*,video/mp4,video/quicktime">
+  </div>
+
+  <audio id="player" controls style="display:none;"></audio>
+
+  <h3>Timestamps</h3>
+  <div id="timestamps">Pause the audio to generate a timestamp (00:00:00)</div>
+
+  <p class="instructions">
+    • Press <strong>Pause</strong> in the audio player to log the current time.<br>
+    • Works entirely in your browser — no data is uploaded.
+  </p>
+
+  <script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const player = document.getElementById('player');
+    const timestamps = document.getElementById('timestamps');
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+      dropArea.classList.add('dragover');
+    }
+
+    function unhighlight() {
+      dropArea.classList.remove('dragover');
+    }
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      if (file) loadFile(file);
+    }
+
+    fileInput.addEventListener('change', function() {
+      if (this.files[0]) loadFile(this.files[0]);
+    });
+
+    function loadFile(file) {
+      const url = URL.createObjectURL(file);
+      player.src = url;
+      player.style.display = 'block';
+      timestamps.textContent = 'Pause the audio to generate a timestamp (00:00:00)';
+    }
+
+    // Listen for pause events
+    player.addEventListener('pause', () => {
+      const seconds = player.currentTime;
+      const timestamp = formatTime(seconds);
+      const newLine = `⏱️ ${timestamp}`;
+      timestamps.textContent += '\n' + newLine;
+      console.log(newLine);
+    });
+
+    function formatTime(seconds) {
+      const hrs = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
