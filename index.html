@@ -106,11 +106,24 @@
       transform: scale(0.98);
     }
 
-    .instructions {
+    .instructions,
+    .attribution,
+    .playback-tip {
       color: #555;
-      margin-top: 1.5rem;
       font-size: 1rem;
       line-height: 1.6;
+    }
+
+    .attribution {
+      text-align: center;
+      margin: 1rem 0 2rem;
+      font-style: italic;
+    }
+
+    .playback-tip {
+      text-align: right;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
     }
 
     a {
@@ -136,6 +149,10 @@
   <div class="container">
     <h1>Audio Timestamp Generator</h1>
 
+    <p class="attribution">
+      Simple timestamp copier created for enhancing legacy transcripts from the Rural Women's History Project, so they can be utilized in the CDIL's <em>Oral History as Data</em> platform.
+    </p>
+
     <div id="drop-area" role="region" aria-label="Audio file upload area">
       <p>Drag & drop an audio file here (MP3, WAV, MP4, MOV)</p>
       <p><small>— or —</small></p>
@@ -145,6 +162,9 @@
     </div>
 
     <audio id="player" controls></audio>
+    <p class="playback-tip">
+      Select the ellipses on the right of the media player to adjust playback speed.
+    </p>
 
     <!-- Changed from h3 to h2 for proper heading hierarchy -->
     <h2>Current Timestamp</h2>
@@ -211,7 +231,6 @@
       const secs = Math.floor(seconds % 60);
       const timestamp = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
       timestampText.textContent = timestamp;
-      // Optional: announce change to screen readers
       timestampText.setAttribute('aria-label', `Current timestamp: ${timestamp}`);
     });
 
