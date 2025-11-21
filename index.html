@@ -69,17 +69,41 @@
       display: none;
     }
 
-    #timestamps {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1rem;
+    #timestamp-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    #timestamp-text {
       font-family: monospace;
-      white-space: pre-wrap;
-      max-height: 300px;
-      overflow-y: auto;
       font-size: 1.1rem;
-      line-height: 1.6;
+      background: white;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    #copy-btn {
+      padding: 0.4rem 0.8rem;
+      background-color: var(--nav-pills);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.2s;
+    }
+
+    #copy-btn:hover {
+      background-color: #003366;
+    }
+
+    #copy-btn:active {
+      transform: scale(0.98);
     }
 
     .instructions {
@@ -93,21 +117,6 @@
       color: var(--link-color);
       text-decoration: underline;
     }
-
-    /* Optional: style the symbol if you add one */
-    .symbol-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 1rem 0;
-    }
-
-    .symbol {
-      font-size: 1.3rem;
-      margin: 0;
-      color: var(--nav-pills);
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -115,18 +124,21 @@
     <h1>Audio Timestamp Generator</h1>
 
     <div id="drop-area">
-      <p>📁 Drag & drop an audio file here (MP3, WAV, MP4, MOV)</p>
+      <p>Drag & drop an audio file here (MP3, WAV, MP4, MOV)</p>
       <p><small>— or —</small></p>
       <input type="file" id="file-input" accept="audio/*,video/mp4,video/quicktime">
     </div>
 
     <audio id="player" controls></audio>
 
-    <h3>Timestamps</h3>
-    <div id="timestamps">Pause the audio to generate a timestamp (00:00:00)</div>
+    <h3>Current Timestamp</h3>
+    <div id="timestamp-display">
+      <div id="timestamp-text">00:00:00</div>
+      <button id="copy-btn" disabled>Copy to Clipboard</button>
+    </div>
 
     <p class="instructions">
-      • Press <strong>Pause</strong> in the audio player to log the current time.<br>
+      • Press <strong>Pause</strong> in the audio player to capture the current time.<br>
       • Works entirely in your browser — no data is uploaded.
     </p>
   </div>
@@ -135,7 +147,8 @@
     const dropArea = document.getElementById('drop-area');
     const fileInput = document.getElementById('file-input');
     const player = document.getElementById('player');
-    const timestamps = document.getElementById('timestamps');
+    const timestampText = document.getElementById('timestamp-text');
+    const copyBtn = document.getElementById('copy-btn');
 
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -170,19 +183,34 @@
       const url = URL.createObjectURL(file);
       player.src = url;
       player.style.display = 'block';
-      timestamps.textContent = 'Pause the audio to generate a timestamp (00:00:00)';
+      timestampText.textContent = '00:00:00';
+      copyBtn.disabled = false;
     }
 
-    // Log timestamp on pause
+    // Update timestamp on pause
     player.addEventListener('pause', () => {
       const seconds = player.currentTime;
       const hrs = Math.floor(seconds / 3600);
       const mins = Math.floor((seconds % 3600) / 60);
       const secs = Math.floor(seconds % 60);
       const timestamp = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      const newLine = `⏱️ ${timestamp}`;
-      timestamps.textContent += '\n' + newLine;
-      console.log(newLine);
+      timestampText.textContent = timestamp;
+    });
+
+    // Copy to clipboard
+    copyBtn.addEventListener('click', () => {
+      const text = timestampText.textContent;
+      if (text && text !== '00:00:00') {
+        navigator.clipboard.writeText(text).then(() => {
+          const originalText = copyBtn.textContent;
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+          }, 1500);
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+      }
     });
   </script>
 </body>
