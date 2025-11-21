@@ -117,23 +117,39 @@
       color: var(--link-color);
       text-decoration: underline;
     }
+
+    /* Hide visually but keep accessible to screen readers */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Audio Timestamp Generator</h1>
 
-    <div id="drop-area">
+    <div id="drop-area" role="region" aria-label="Audio file upload area">
       <p>Drag & drop an audio file here (MP3, WAV, MP4, MOV)</p>
       <p><small>— or —</small></p>
+      <!-- Accessible label for file input -->
+      <label for="file-input" class="sr-only">Choose an audio or video file to upload</label>
       <input type="file" id="file-input" accept="audio/*,video/mp4,video/quicktime">
     </div>
 
     <audio id="player" controls></audio>
 
-    <h3>Current Timestamp</h3>
-    <div id="timestamp-display">
-      <div id="timestamp-text">00:00:00</div>
+    <!-- Changed from h3 to h2 for proper heading hierarchy -->
+    <h2>Current Timestamp</h2>
+    <div id="timestamp-display" aria-live="polite">
+      <div id="timestamp-text" aria-label="Current timestamp">00:00:00</div>
       <button id="copy-btn" disabled>Copy to Clipboard</button>
     </div>
 
@@ -195,6 +211,8 @@
       const secs = Math.floor(seconds % 60);
       const timestamp = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
       timestampText.textContent = timestamp;
+      // Optional: announce change to screen readers
+      timestampText.setAttribute('aria-label', `Current timestamp: ${timestamp}`);
     });
 
     // Copy to clipboard
